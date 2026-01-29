@@ -4,6 +4,12 @@
 
 ### Major Changes
 
+- 70ffb69: clean major release
+
+## 1.0.0
+
+### Major Changes
+
 - 2615558: - feat: enhance useHookDialog with generic types for better type safety
 
   - Updated useHookDialog to accept a generic type parameter for more flexible return types.
