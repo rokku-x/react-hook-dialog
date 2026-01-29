@@ -1,5 +1,5 @@
 name: Changesets - Create Release(s) on Main
-
+run-name: Create Release(s) on Main for commit ${{ github.sha }}
 on:
   push:
     branches: [ main ]
@@ -29,11 +29,10 @@ jobs:
         id: has_version_changes
         run: |
           set -e
-          # Fetch main to compare against and find files changed in the most recent commit(s)
-          git fetch origin main --depth=1 || true
-          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
-          echo "Files changed in recent commits: $files"
-          if echo "$files" | grep -E '(^|/)CHANGELOG\.md$|(^|/)package\.json$' >/dev/null; then
+          # Check only the most recent commit for CHANGELOG changes
+          files="$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)"
+          echo "Files changed in the last commit: $files"
+          if echo "$files" | grep -E '(^|/)CHANGELOG\.md$' >/dev/null; then
             echo "has=true" >> $GITHUB_OUTPUT
           else
             echo "has=false" >> $GITHUB_OUTPUT

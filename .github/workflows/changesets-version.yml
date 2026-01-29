@@ -1,4 +1,5 @@
 name: Changesets - Create Version PR
+run-name: Create Version PR for changes in .changeset/ on commit ${{ github.sha }}
 
 on:
   push:
@@ -20,12 +21,13 @@ jobs:
         with:
           fetch-depth: 0 # Changesets needs history to generate changelogs correctly
 
-      - name: Check for .changeset MD files
+      - name: Check for .changeset MD files (last commit only)
         id: check_changeset_md
         run: |
           set -e
-          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
-          echo "Changed files: $files"
+          # Check only files changed in the most recent commit (HEAD^..HEAD)
+          files="$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)"
+          echo "Changed files in last commit: $files"
           if echo "$files" | grep -E '^\.changeset/.*\.md$' >/dev/null; then
             echo "md=true" >> $GITHUB_OUTPUT
           else
