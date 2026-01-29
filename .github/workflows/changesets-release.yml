@@ -25,6 +25,26 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Detect version/changelog changes
+        id: has_version_changes
+        run: |
+          set -e
+          # Fetch main to compare against and find files changed in the most recent commit(s)
+          git fetch origin main --depth=1 || true
+          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
+          echo "Files changed in recent commits: $files"
+          if echo "$files" | grep -E '(^|/)CHANGELOG\.md$|(^|/)package\.json$' >/dev/null; then
+            echo "has=true" >> $GITHUB_OUTPUT
+          else
+            echo "has=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if no version/changelog changes
+        if: steps.has_version_changes.outputs.has == 'false'
+        run: |
+          echo "No version/changelog changes detected in recent commits; exiting early.";
+          exit 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -67,18 +87,7 @@ jobs:
         env:
           ROLLUP_SKIP_NATIVE: true
 
-      - name: Detect version/changelog changes
-        id: has_version_changes
-        run: |
-          set -e
-          # Find files changed in the last commit(s). We fetch depth 2 above so HEAD^ exists.
-          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
-          echo "Files changed in recent commits: $files"
-          if echo "$files" | grep -E '(^|/)CHANGELOG\.md$|(^|/)package\.json$' >/dev/null; then
-            echo "has=true" >> $GITHUB_OUTPUT
-          else
-            echo "has=false" >> $GITHUB_OUTPUT
-          fi
+# (Moved earlier in the job to avoid running heavy steps when not necessary)
 
       - name: Get new version
         if: steps.has_version_changes.outputs.has == 'true'
@@ -96,6 +105,16 @@ jobs:
           cat release_notes.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Check RELEASE_TOKEN
+        if: steps.has_version_changes.outputs.has == 'true'
+        run: |
+          if [ -z "${RELEASE_TOKEN}" ]; then
+            echo "RELEASE_TOKEN secret is missing; please add it to repository secrets";
+            exit 1;
+          fi
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
       - name: Create GitHub Release
         if: steps.has_version_changes.outputs.has == 'true'
         uses: actions/create-release@v1
@@ -106,7 +125,7 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Set released output
         if: steps.has_version_changes.outputs.has == 'true'
@@ -116,9 +135,3 @@ jobs:
       - name: Skip message
         if: steps.has_version_changes.outputs.has == 'false'
         run: echo "No version/changelog changes detected - skipping release creation."
-
-  publish:
-    needs: release
-    if: needs.release.outputs.released == 'true'
-    uses: ./.github/workflows/publish.yml
-    secrets: inherit

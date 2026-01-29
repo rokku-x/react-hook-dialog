@@ -20,6 +20,24 @@ jobs:
         with:
           fetch-depth: 0 # Changesets needs history to generate changelogs correctly
 
+      - name: Check for .changeset MD files
+        id: check_changeset_md
+        run: |
+          set -e
+          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
+          echo "Changed files: $files"
+          if echo "$files" | grep -E '^\.changeset/.*\.md$' >/dev/null; then
+            echo "md=true" >> $GITHUB_OUTPUT
+          else
+            echo "md=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if no .changeset MD files
+        if: steps.check_changeset_md.outputs.md == 'false'
+        run: |
+          echo "No .md files changed in .changeset; exiting early."
+          exit 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
