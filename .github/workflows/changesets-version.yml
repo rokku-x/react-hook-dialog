@@ -1,0 +1,89 @@
+name: Changesets - Create Version PR
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.changeset/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-version-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Changesets needs history to generate changelogs correctly
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1'
+
+      - name: Install dependencies (bun)
+        run: |
+          if [ -f bun.lockb ]; then
+            bun ci
+          else
+            bun install
+          fi
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Run tests (bun)
+        run: bun run test -- --run
+        env:
+          CI: true
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Build (bun)
+        run: bun run build
+        env:
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Apply changeset version
+        id: apply_version
+        run: |
+          # Apply versions locally without committing yet
+          bunx changeset version
+          
+          # Check if files actually changed
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Read new version
+        if: steps.apply_version.outputs.changed == 'true'
+        id: version
+        run: |
+          ver=$(node -e "console.log(require('./package.json').version)")
+          echo "version=$ver" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.apply_version.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # The Action will handle the commit and push automatically
+          commit-message: "chore(release): v${{ steps.version.outputs.version }}"
+          title: "chore(release): v${{ steps.version.outputs.version }}"
+          body: |
+            Automated version bump to v${{ steps.version.outputs.version }}
+            
+            See CHANGELOG.md for details.
+          branch: "changeset-release/v${{ steps.version.outputs.version }}"
+          base: main
+          delete-branch: true

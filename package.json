@@ -1,0 +1,92 @@
+{
+  "name": "@rokku-x/react-hook-dialog",
+  "version": "0.0.1",
+  "author": "rokku-x",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rokku-x/react-hook-dialog.git"
+  },
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "jsdom": "^24.1.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^1.6.1",
+    "copyfiles": "^2.4.1"
+  },
+  "peerDependencies": {
+    "@rokku-x/react-hook-modal": "^0.7.8",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "zustand": "^5.0.10"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bugs": {
+    "url": "https://github.com/rokku-x/react-hook-dialog/issues"
+  },
+  "description": "A React dialog hook library for confirmation dialogs, alerts, and modals with rich variants and full customization",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "homepage": "https://github.com/rokku-x/react-hook-dialog#readme",
+  "keywords": [
+    "react",
+    "react-hooks",
+    "dialog",
+    "modal",
+    "confirmation",
+    "alert",
+    "prompt",
+    "hook",
+    "typescript",
+    "zustand",
+    "ui",
+    "component",
+    "dialog-box",
+    "confirmation-dialog",
+    "react-dialog",
+    "react-modal"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "vite build && copyfiles -u 1 \"src/types/**/*.d.ts\" dist/ && copyfiles README.md LICENSE dist/",
+    "publish:first": "npm publish --access public --provenance false",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "changeset": "changeset",
+    "version:changeset": "changeset version",
+    "publish:changeset": "changeset publish --access public"
+  },
+  "sideEffects": false,
+  "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  }
+}

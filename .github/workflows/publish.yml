@@ -1,0 +1,57 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [published]
+  workflow_call: {}
+
+permissions:
+  id-token: write 
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1'
+
+      - name: Install dependencies (bun)
+        run: |
+          if [ -f bun.lockb ]; then
+            bun ci
+          else
+            bun install
+          fi
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Run tests (bun)
+        run: bun run test -- --run
+        env:
+          CI: true
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Build (bun)
+        run: bun run build
+        env:
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NPM_CONFIG_PROVENANCE: true

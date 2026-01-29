@@ -1,0 +1,15 @@
+{
+    "changelog": [
+        "@changesets/cli/changelog",
+        {
+            "repo": "rokku-x/react-hook-dialog"
+        }
+    ],
+    "commit": false,
+    "fixed": [],
+    "linked": [],
+    "access": "public",
+    "baseBranch": "main",
+    "updateInternalDependencies": "patch",
+    "ignore": []
+}

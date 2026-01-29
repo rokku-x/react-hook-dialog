@@ -1,0 +1,124 @@
+name: Changesets - Create Release(s) on Main
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'package.json'
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: write
+  id-token: write 
+  packages: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.set_released.outputs.released }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1'
+
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun
+            ~/.cache/bun
+          key: ${{ runner.os }}-bun-20-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-20-
+
+      - name: Install dependencies (bun)
+        run: |
+          if [ -f bun.lockb ]; then
+            bun ci
+          else
+            bun install
+          fi
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Run tests (bun)
+        run: bun run test -- --run
+        env:
+          CI: true
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Build (bun)
+        run: bun run build
+        env:
+          ROLLUP_SKIP_NATIVE: true
+
+      - name: Detect version/changelog changes
+        id: has_version_changes
+        run: |
+          set -e
+          # Find files changed in the last commit(s). We fetch depth 2 above so HEAD^ exists.
+          files="$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD~5..HEAD || true)"
+          echo "Files changed in recent commits: $files"
+          if echo "$files" | grep -E '(^|/)CHANGELOG\.md$|(^|/)package\.json$' >/dev/null; then
+            echo "has=true" >> $GITHUB_OUTPUT
+          else
+            echo "has=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get new version
+        if: steps.has_version_changes.outputs.has == 'true'
+        id: get_version
+        run: |
+          node -e "console.log(require('./package.json').version)" > version.txt
+          echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Get release notes
+        if: steps.has_version_changes.outputs.has == 'true'
+        id: get_notes
+        run: |
+          node -e "const fs=require('fs'); const s=fs.readFileSync('CHANGELOG.md','utf8'); const m=s.match(/## [\s\S]*?(?=\n## |$)/); console.log(m?m[0]:'No changelog entry');" > release_notes.txt
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.has_version_changes.outputs.has == 'true'
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Release v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.get_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set released output
+        if: steps.has_version_changes.outputs.has == 'true'
+        id: set_released
+        run: echo "released=true" >> $GITHUB_OUTPUT
+
+      - name: Skip message
+        if: steps.has_version_changes.outputs.has == 'false'
+        run: echo "No version/changelog changes detected - skipping release creation."
+
+  publish:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
