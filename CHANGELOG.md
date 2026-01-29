@@ -1,5 +1,13 @@
 # @rokku-x/react-hook-dialog
 
+## 1.0.1
+
+### Patch Changes
+
+- 8641055: feat: enhance release workflow to detect version/changelog changes and exit early if none found
+  feat: add check for .changeset MD files in version workflow and exit early if none found
+  fix: update CI workflow to use Node.js version 24
+
 ## 1.0.0
 
 ### Major Changes
