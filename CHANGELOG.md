@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.0.2
+
+### Patch Changes
+
+- 799a12a: feat: update workflow run names for clarity and consistency
+
 ## 1.0.1
 
 ### Patch Changes
