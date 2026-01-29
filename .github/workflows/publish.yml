@@ -1,5 +1,5 @@
-name: Publish to NPM
-run-name: Publish Version Tag ${{ github.event.release.tag_name }} to NPM
+name: Publish to NPM 
+run-name: Publish ${{ github.ref_name }} ${{ github.ref }}  Version Tag ${{ github.event.release.tag_name }} to NPM
 
 on:
   release:

@@ -1,5 +1,5 @@
 name: Changesets - Create Version PR
-run-name: Create Version PR for changes in .changeset/ on commit ${{ github.sha }}
+run-name: Create PR for ${{ github.ref_name }} ${{ github.ref }} 
 
 on:
   push:
@@ -25,9 +25,9 @@ jobs:
         id: check_changeset_md
         run: |
           set -e
-          # Check only files changed in the most recent commit (HEAD^..HEAD)
-          files="$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)"
-          echo "Changed files in last commit: $files"
+          # Check only added/modified files in the most recent commit (ignore deletions)
+          files="$(git diff --diff-filter=AM --name-only HEAD^ HEAD 2>/dev/null || true)"
+          echo "Added/modified files in last commit: $files"
           if echo "$files" | grep -E '^\.changeset/.*\.md$' >/dev/null; then
             echo "md=true" >> $GITHUB_OUTPUT
           else

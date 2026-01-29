@@ -1,5 +1,6 @@
 name: CI
-run-name: CI Checks on commit ${{ github.sha }}
+# use shortened sha
+run-name: CI Checks on commit ${{ github.ref_name }} ${{ github.ref }} 
 
 on:
   push:

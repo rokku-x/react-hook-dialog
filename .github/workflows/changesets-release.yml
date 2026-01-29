@@ -1,5 +1,5 @@
 name: Changesets - Create Release(s) on Main
-run-name: Create Release(s) on Main for commit ${{ github.sha }}
+run-name: Create Release(s) on Main for ${{ github.ref_name }} ${{ github.ref }} 
 on:
   push:
     branches: [ main ]
@@ -29,9 +29,9 @@ jobs:
         id: has_version_changes
         run: |
           set -e
-          # Check only the most recent commit for CHANGELOG changes
-          files="$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)"
-          echo "Files changed in the last commit: $files"
+          # Check only added/modified files in the most recent commit for CHANGELOG changes (ignore deletions)
+          files="$(git diff --diff-filter=AM --name-only HEAD^ HEAD 2>/dev/null || true)"
+          echo "Added/modified files in the last commit: $files"
           if echo "$files" | grep -E '(^|/)CHANGELOG\.md$' >/dev/null; then
             echo "has=true" >> $GITHUB_OUTPUT
           else
