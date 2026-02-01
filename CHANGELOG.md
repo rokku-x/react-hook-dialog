@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.0.3
+
+### Patch Changes
+
+- 12fa47b: fix: type being overwritten
+
 ## 1.0.2
 
 ### Patch Changes
