@@ -1,5 +1,13 @@
 # @rokku-x/react-hook-dialog
 
+## 1.0.4
+
+### Patch Changes
+
+- 8f04549: feat: update README with examples and best practices; modify package.json and bun.lock for dependency updates; enhance Vite config for directive preservation
+- 8f04549: feat: add screenshot examples and Playwright tests for dialog components
+- 3b4b25c: test: add screenshot tests for dialog examples
+
 ## 1.0.3
 
 ### Patch Changes
