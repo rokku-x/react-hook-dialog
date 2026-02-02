@@ -151,7 +151,9 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                                     data-action-focused={action.isFocused ? 'true' : undefined}
                                     className={`hook-dialog-action-button hook-dialog-action-${action.variant || 'secondary'} ${classNames.actionButton || ''} ${action.className || ''}`}
                                     onClick={(e) => {
-                                        action.onClick?.(e as React.MouseEvent<HTMLButtonElement>, action);
+                                        try {
+                                            action.onClick?.(e as React.MouseEvent<HTMLButtonElement>, action);
+                                        } catch { }
                                         if (action.isSubmit && config.isReturnSubmit && formRef.current) return handleAction(modalWindowId, action, FormDataToObject(new FormData(formRef.current)));
                                         else if (action.isSubmit) formRef.current?.requestSubmit();
                                         if (action.noActionReturn) return e.stopPropagation();
