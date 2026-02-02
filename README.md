@@ -72,13 +72,6 @@ function MyComponent() {
 }
 ```
 
-## Bundle Size
-
-- ESM: ~4.06 kB gzipped (13.48 kB raw)
-- CJS: ~3.48 kB gzipped (9.21 kB raw)
-
-Measured with Vite build for v0.0.1.
-
 ## API Reference
 
 ### useHookDialog
@@ -276,6 +269,8 @@ function DeleteConfirm() {
 }
 ```
 
+![Example 1 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-1.png)
+
 ### Example 2: Multiple Action Rows
 
 ```tsx
@@ -293,6 +288,8 @@ await requestDialog({
   ]
 });
 ```
+
+![Example 2 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-2.png)
 
 ### Example 3: Custom Styling
 
@@ -318,6 +315,8 @@ await requestDialog({
 });
 ```
 
+![Example 3 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-3.png)
+
 ### Example 4: Custom Button Variants
 
 ```tsx
@@ -338,6 +337,8 @@ await requestDialog({
 });
 ```
 
+![Example 4 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-4.png)
+
 ### Example 5: Button Click Handlers
 
 ```tsx
@@ -356,6 +357,8 @@ await requestDialog({
   ]]
 });
 ```
+
+![Example 5 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-5.png)
 
 ### Example 6: Rich Content
 
@@ -377,6 +380,8 @@ await requestDialog({
 });
 ```
 
+![Example 6 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-6.png)
+
 ### Example 7: Default Configuration
 
 ```tsx
@@ -395,6 +400,8 @@ await requestDialog({
 });
 ```
 
+![Example 7 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-7.png)
+
 ### Example 8: Alert Dialog
 
 ```tsx
@@ -412,6 +419,8 @@ async function showAlert(message: string) {
 
 showAlert('Operation completed successfully!');
 ```
+
+![Example 8 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-8.png)
 
 ### Example 9: Multiple Choice with Different Values
 
@@ -438,6 +447,8 @@ const handleSaveOptions = async () => {
   }
 };
 ```
+
+![Example 9 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-9.png)
 
 ### Example 10: Numeric Rating Dialog
 
@@ -467,6 +478,8 @@ const handleRating = async () => {
   // Send rating to API
 };
 ```
+
+![Example 10 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-10.png)
 
 ### Example 11: Conditional Actions Based on Result
 
@@ -515,6 +528,8 @@ const handleFileOperation = async () => {
 };
 ```
 
+![Example 11 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-11.png)
+
 ### Example 12: Handle Cancel vs Reject
 
 ```tsx
@@ -543,6 +558,8 @@ const handleWithErrorHandling = async () => {
   }
 };
 ```
+
+![Example 12 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-12.png)
 
 ### Example 13: Form Submission with Validation
 
@@ -587,6 +604,33 @@ const handleFormSubmit = async (formData: any) => {
 };
 ```
 
+![Example 13 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-13.png)
+
+### Example 14: Boolean Result with Custom Values
+
+```tsx
+const [requestDialog] = useHookDialog();
+
+const handleLogout = async () => {
+  const shouldLogout = await requestDialog({
+    title: 'Confirm Logout',
+    content: 'Are you sure you want to log out?',
+    actions: [[
+      { title: 'Stay Logged In', variant: 'secondary', value: false },
+      { title: 'Log Out', variant: 'danger', value: true }
+    ]]
+  });
+
+  if (shouldLogout) {
+    // Perform logout
+    sessionStorage.clear();
+    window.location.href = '/login';
+  }
+};
+```
+
+![Example 14 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-14.png)
+
 ### Example 15: Form Dialog Returning Values (isReturnSubmit)
 
 ```tsx
@@ -623,40 +667,9 @@ async function openProfileDialog() {
 }
 ```
 
+![Example 15 Screenshot](https://jgd.qzz.io/screenshots/react-hook-dialog-example-15.png)
+
 > Note: `isReturnSubmit` overrides `noActionReturn` and returns the serialized form values as the action `value`. `isSubmit` still triggers `requestSubmit()` to allow native validation flows.
-### Example 14: Boolean Result with Custom Values
-
-```tsx
-const [requestDialog] = useHookDialog();
-
-const handleLogout = async () => {
-  const shouldLogout = await requestDialog({
-    title: 'Confirm Logout',
-    content: 'Are you sure you want to log out?',
-    actions: [[
-      { title: 'Stay Logged In', variant: 'secondary', value: false },
-      { title: 'Log Out', variant: 'danger', value: true }
-    ]]
-  });
-
-  if (shouldLogout) {
-    // Perform logout
-    sessionStorage.clear();
-    window.location.href = '/login';
-  }
-};
-```
-
-## Best Practices
-
-1. **Mount `BaseModalRenderer` at root level** - Required for modals to render
-2. **Use default configs for consistency** - Set common styles/behaviors once
-3. **Provide meaningful button labels** - Users should know what each button does
-4. **Use appropriate variants** - Use `danger` for destructive actions, `success` for confirmations
-5. **Keep content concise** - Dialogs should be focused and brief
-6. **Handle both resolve and reject** - Account for cancellation scenarios
-7. **Use `isOnLeft` for secondary actions** - Helps with visual hierarchy
-8. **Customize responsibly** - Maintain accessibility and usability standards
 
 ## Types
 
@@ -684,6 +697,17 @@ Custom styles for each variant type.
 - ARIA labels provided for interactive elements
 - Supports custom ARIA attributes via className injection
 
+## Best Practices
+
+1. **Mount `BaseModalRenderer` at root level** - Required for modals to render
+2. **Use default configs for consistency** - Set common styles/behaviors once
+3. **Provide meaningful button labels** - Users should know what each button does
+4. **Use appropriate variants** - Use `danger` for destructive actions, `success` for confirmations
+5. **Keep content concise** - Dialogs should be focused and brief
+6. **Handle both resolve and reject** - Account for cancellation scenarios
+7. **Use `isOnLeft` for secondary actions** - Helps with visual hierarchy
+8. **Customize responsibly** - Maintain accessibility and usability standards
+
 ## Troubleshooting
 
 ### Dialog not appearing
@@ -698,6 +722,14 @@ Custom styles for each variant type.
 ### Promise never resolves
 - Ensure action buttons have appropriate `value` or are configured as cancel buttons
 - Check that action click handlers don't prevent default behavior
+
+
+## Bundle Size
+
+- ESM: ~4.06 kB gzipped (13.48 kB raw)
+- CJS: ~3.48 kB gzipped (9.21 kB raw)
+
+Measured with Vite build for v0.0.1.
 
 ## License
 
