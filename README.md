@@ -1,6 +1,6 @@
 # react-hook-dialog
 
-[![CI](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml/badge.svg)](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml)
+[![CI](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml/badge.svg)](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![license](https://img.shields.io/npm/l/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![downloads](https://img.shields.io/npm/dm/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) ![TS](https://img.shields.io/badge/TS-%E2%9C%93-blue)
 
 A powerful and flexible React dialog hook library for confirmation dialogs, alerts, and modals. Built on top of `@rokku-x/react-hook-modal` with a focus on dialog-specific features like action buttons, variants, and customizable styling.
 
@@ -12,7 +12,7 @@ A powerful and flexible React dialog hook library for confirmation dialogs, aler
 - 📝 **Dialog Actions** - Flexible action button system with left/right positioning
 - 💅 **Full Customization** - Injectable className and styles at every level
 - ⌨️ **Rich Configuration** - Default configs with per-call overrides
-- 🎁 **Zero Dependencies** - Only requires React, Zustand, and @rokku-x/react-hook-modal
+- 🎁 **Zero Non-Core Dependencies** - Only requires React, Zustand, and @rokku-x/react-hook-modal
 - 📱 **TypeScript Support** - Full type safety out of the box
 - ♿ **Backdrop Control** - Configurable backdrop click behavior
 
@@ -91,39 +91,41 @@ useHookDialog(defaultConfig?: UseHookDialogConfig)
 #### Returns
 
 ```typescript
-[requestDialog]
+[requestDialog, getContext]
 ```
 
 | Return Value | Type | Description |
 |---|---|---|
-| `requestDialog` | `(config: ConfirmConfig) => RequestDialogReturnType<ValidValue>` | Function to open a dialog and get user response. `RequestDialogReturnType<T>` is defined as `Promise<T> & { id: string; context: DialogInstanceContext }` which means the native Promise resolves with `T` while the *returned* value exposes `id` and `context` for programmatic control. |
+| `requestDialog` | `(config: ConfirmConfig) => RequestDialogReturnType<ValidValue>` | Open a dialog and receive a result. The return value is an **augmented Promise** (see `RequestDialogReturnType<T>`). |
+| `getContext` | `(id: string) => DialogInstanceContext` | Retrieve the runtime context for an open dialog by its `id` (useful if you only have the `id`). |
 
 ```typescript
-// Convenience alias shown in the library
+// Augmented promise returned by `requestDialog`
 type RequestDialogReturnType<T> = Promise<T> & { id: string; context: DialogInstanceContext };
 ```
 
+> Important: awaiting the returned Promise resolves with the dialog result (`T`). The `id` and `context` properties are available immediately after calling `requestDialog(...)`, allowing programmatic control while the dialog is open.
+
 ### Dialog Context & Force Functions ✅
 
-The Promise returned from `requestDialog(...)` is augmented with:
+The augmented Promise exposes two helpers:
 
 - `id: string` — unique identifier for the dialog instance
-- `context: DialogInstanceContext` — helper methods to programmatically control the dialog instance
+- `context: DialogInstanceContext` — runtime control helpers
 
-You can access the context either directly from the returned Promise (`promise.context`) or via the second value returned from the hook (`getContext(id)`).
+`DialogInstanceContext` methods:
 
-Dialog context methods:
+| Method | Signature | Description |
+|---|---|---|
+| `forceCancel` | `forceCancel(forceReject?: boolean = true): void` | Close the dialog as a cancellation. **Default:** `forceReject = true` (the promise will be rejected by default). If set to `false`, the dialog follows the dialog's `rejectOnCancel` setting. |
+| `forceAction` | `forceAction(action: ModalAction): void` | Programmatically trigger the specified action (resolves/rejects according to the action and dialog config). |
+| `forceDefault` | `forceDefault(): void` | Trigger the dialog's default action (first action marked with `isFocused`). Throws if no default is defined. |
 
-- `forceCancel(forceReject?: boolean)` — close the dialog as a cancellation. If `forceReject` is `true` the promise will be rejected even if the dialog `rejectOnCancel` config is `false`. Otherwise the usual `rejectOnCancel` behavior applies.
-- `forceAction(action: ModalAction)` — programmatically trigger a specific action (resolve/reject according to the action and dialog config).
-- `forceDefault()` — triggers the dialog's default action (first action marked with `isFocused`). Throws if no default action is defined.
-
-Example usage:
+Quick example:
 
 ```tsx
 const [requestDialog, getContext] = useHookDialog();
 
-// open a dialog and get the augmented promise
 const p = requestDialog({
   title: 'Confirm',
   content: 'Proceed?',
@@ -133,21 +135,17 @@ const p = requestDialog({
   ]]
 });
 
+// id available immediately
 console.log('dialog id:', p.id);
 
-// force the default action (same as clicking the focused action)
-p.context.forceDefault();
-
-// or cancel programmatically (forces reject by default)
+// cancel programmatically (rejects by default)
 p.context.forceCancel();
 
-// you can also use the helper returned from the hook
-const ctx = getContext(p.id);
-ctx.forceAction({ title: 'OK', value: true });
+// or trigger an action directly via the helper
+getContext(p.id).forceAction({ title: 'OK', value: true });
 ```
 
-> Note: `forceDefault()` will throw if no action is marked with `isFocused`. Use `forceAction(...)` to explicitly specify which action to run.
-
+> Tip: use `forceAction(...)` when you want to trigger a specific action object. Use `forceDefault()` to trigger the focused/default action (if defined). The returned Promise still resolves with the action's `value` (or rejects when cancelled).
 #### Default Config Options
 
 | Property | Type | Default | Description |
