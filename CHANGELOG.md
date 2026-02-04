@@ -1,5 +1,18 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.0
+
+### Minor Changes
+
+- afcbee4: feat: introduce BaseDialogRenderer for default configuration and enhance dialog management
+
+### Patch Changes
+
+- afcbee4: patch: exported types
+- afcbee4: patch: update react-hook-modal to 0.9.4
+- afcbee4: patch: readme update
+- afcbee4: patch: css bundling
+
 ## 1.1.0
 
 ### Minor Changes
