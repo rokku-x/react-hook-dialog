@@ -37,10 +37,13 @@
  */
 
 /**
- * Re-export of BaseModalRenderer from @rokku-x/react-hook-modal.
- * Must be mounted at the root of your application for dialogs to render.
+ * Re-exports of renderer components.
+ * - `BaseModalRenderer` is the upstream renderer from `@rokku-x/react-hook-modal`.
+ * - `BaseDialogRenderer` is a small wrapper provided by this package that allows setting a `defaultConfig` prop.
+ * Both should be mounted at the root of your application for dialogs to render.
  */
 export { BaseModalRenderer } from '@rokku-x/react-hook-modal';
+export { default as BaseDialogRenderer } from '@/components/BaseDialogRenderer';
 
 /**
  * Main hook for displaying confirmation dialogs and alerts.
@@ -48,3 +51,5 @@ export { BaseModalRenderer } from '@rokku-x/react-hook-modal';
  */
 export { default as useHookDialog } from '@/hooks/useHookDialog';
 
+// Useful exported types for consumers
+export type { UseHookDialogConfig, ConfirmConfig, ModalAction, RequestDialogReturnType, DialogInstanceContext, RequestDialog, UseHookDialogReturnType } from '@/types';

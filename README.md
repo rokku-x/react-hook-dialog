@@ -2,37 +2,45 @@
 
 [![CI](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml/badge.svg)](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![license](https://img.shields.io/npm/l/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![downloads](https://img.shields.io/npm/dm/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) ![TS](https://img.shields.io/badge/TS-%E2%9C%93-blue)
 
-A powerful and flexible React dialog hook library for confirmation dialogs, alerts, and modals. Built on top of `@rokku-x/react-hook-modal` with a focus on dialog-specific features like action buttons, variants, and customizable styling.
+A lightweight, powerful, and flexible React dialog hook library for confirmation dialogs, alerts, and modals. Built on top of `@rokku-x/react-hook-modal` with a focus on dialog-specific features like action buttons, variants, and customizable styling.
 
 ## Features
 
+- ♿ **Accessibility Focused** - Keyboard navigation and ARIA support
+- 🔄 **Asynchronous** - Async/await friendly dialog results
 - 🎯 **Hook-based API** - Simple and intuitive `useHookDialog()` hook
 - 🎨 **Rich Variants** - 7 button variants (primary, secondary, danger, success, warning, info, neutral)
-- 🧩 **Modular Components** - Composed from reusable Backdrop and DialogWindow components
 - 📝 **Dialog Actions** - Flexible action button system with left/right positioning
 - 💅 **Full Customization** - Injectable className and styles at every level
 - ⌨️ **Rich Configuration** - Default configs with per-call overrides
-- 🎁 **Zero Non-Core Dependencies** - Only requires React, Zustand, and @rokku-x/react-hook-modal
 - 📱 **TypeScript Support** - Full type safety out of the box
-- ♿ **Backdrop Control** - Configurable backdrop click behavior
+- 🧑‍🤝‍🧑 **Multiple Dialogs** - Support for multiple simultaneous dialogs
+- 🛠️ **Programmatic Control** - Force actions and cancellations via dialog context
+- 🖼️ **Rich Content Support** - Accepts React nodes for titles and content
+- 📦 **Lightweight** - Minimal bundle size for fast load times
 
 ## Installation
 
 ```bash
 npm install @rokku-x/react-hook-dialog
-```
-
-or with yarn:
-
-```bash
+# or
+bun add @rokku-x/react-hook-dialog
+# or
 yarn add @rokku-x/react-hook-dialog
+# or
+pnpm add @rokku-x/react-hook-dialog
 ```
 
 ## Quick Start
 
-### 1. Setup BaseModalRenderer
+### 1. Setup BaseModalRenderer or BaseDialogRenderer
 
-First, add the `BaseModalRenderer` at the root of your application (from `@rokku-x/react-hook-modal`):
+You can either use the upstream `BaseModalRenderer` directly (from `@rokku-x/react-hook-modal`) or use the convenience wrapper `BaseDialogRenderer` provided by this package.
+
+- `BaseModalRenderer` (upstream): mount this at the root to render modal instances.
+- `BaseDialogRenderer` (this package): a thin wrapper around `BaseModalRenderer` that lets you pass a `defaultConfig` prop to set default dialog options for all dialogs created by `useHookDialog()`.
+
+Use `BaseModalRenderer` directly:
 
 ```tsx
 import { BaseModalRenderer } from '@rokku-x/react-hook-modal';
@@ -46,6 +54,23 @@ function App() {
   );
 }
 ```
+
+Or use the wrapper `BaseDialogRenderer` from this package to set defaults:
+
+```tsx
+import { BaseDialogRenderer } from '@rokku-x/react-hook-dialog';
+
+function App() {
+  return (
+    <>
+      <YourComponents />
+      <BaseDialogRenderer defaultConfig={{ showCloseButton: false, backdropCancel: false }} />
+    </>
+  );
+}
+```
+
+Either component is fine — `BaseDialogRenderer` simply sets the dialog defaults for you so consumers of `useHookDialog()` don't have to provide them on each call.
 
 ### 2. Use useHookDialog Hook
 
@@ -126,13 +151,12 @@ Quick example:
 ```tsx
 const [requestDialog, getContext] = useHookDialog();
 
+const actions: ModalAction[][] = [[ { title: 'Cancel', isCancel: true }, { title: 'OK', value: true, isFocused: true } ]];
+
 const p = requestDialog({
   title: 'Confirm',
   content: 'Proceed?',
-  actions: [[
-    { title: 'Cancel', isCancel: true },
-    { title: 'OK', value: true, isFocused: true }
-  ]]
+  actions
 });
 
 // id available immediately
@@ -141,8 +165,10 @@ console.log('dialog id:', p.id);
 // cancel programmatically (rejects by default)
 p.context.forceCancel();
 
-// or trigger an action directly via the helper
-getContext(p.id).forceAction({ title: 'OK', value: true });
+// trigger a specific action by referencing the action in the array
+getContext(p.id).forceAction(actions[0][1]); // triggers `okAction`
+// or
+p.context.forceAction(actions[0][0]); // triggers `cancelAction`
 ```
 
 > Tip: use `forceAction(...)` when you want to trigger a specific action object. Use `forceDefault()` to trigger the focused/default action (if defined). The returned Promise still resolves with the action's `value` (or rejects when cancelled).
@@ -260,6 +286,18 @@ Customize inline styles for all elements:
 | `actionButton` | `React.CSSProperties` | Action button styles |
 
 ## Components
+
+### BaseDialogRenderer 🔧
+
+A convenience wrapper around the upstream `BaseModalRenderer` that accepts a `defaultConfig` prop allowing you to specify default `UseHookDialogConfig` for all dialogs created by `useHookDialog()`.
+
+```tsx
+import { BaseDialogRenderer } from '@rokku-x/react-hook-dialog';
+
+<BaseDialogRenderer defaultConfig={{ showCloseButton: false, backdropCancel: false }} />
+```
+
+> Note: `BaseModalRenderer` from `@rokku-x/react-hook-modal` can still be used directly if you prefer — this wrapper only adds `defaultConfig` convenience.
 
 ### Backdrop
 
@@ -774,10 +812,10 @@ Custom styles for each variant type.
 
 ## Bundle Size
 
-- ESM: ~4.06 kB gzipped (13.48 kB raw)
-- CJS: ~3.48 kB gzipped (9.21 kB raw)
+- ESM : ~6.69 kB gzipped (13.10 kB raw)
+- CJS : ~7.35 kB gzipped (14.14 kB raw)
 
-Measured with Vite build for v0.0.1.
+Measured with Vite build for the current branch.
 
 ## License
 

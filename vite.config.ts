@@ -5,6 +5,36 @@ import path from 'path'
 import pkg from './package.json';
 import preserveDirectives from 'rollup-plugin-preserve-directives';
 
+// Custom plugin to inject CSS into JS
+function injectCss() {
+    return {
+        name: 'inject-css',
+        enforce: 'post' as const,
+        generateBundle(options: any, bundle: any) {
+            const cssFiles = Object.keys(bundle).filter(key => key.endsWith('.css'));
+            const cssContent = cssFiles.map(key => bundle[key].source).join('');
+
+            if (cssContent) {
+                let injectCode = `
+                    if (typeof document !== 'undefined') {
+                    const style = document.createElement('style');
+                    style.textContent = ${JSON.stringify(cssContent)};
+                    document.head.appendChild(style);
+                }`;
+
+                injectCode = injectCode.replace(/\s+/g, ' ').trim();
+                const entryKeys = Object.keys(bundle).filter(key =>
+                    (key === 'index.esm.js' || key === 'index.cjs.js') && bundle[key].type === 'chunk'
+                );
+                entryKeys.forEach(key => {
+                    const chunk = bundle[key];
+                    chunk.code = chunk.code + '\n' + injectCode;
+                });
+            }
+        }
+    };
+}
+
 export default defineConfig({
     resolve: {
         alias: {
@@ -20,7 +50,8 @@ export default defineConfig({
             include: ['src/**/*'],
             exclude: ['src/main.tsx', 'src/**/*.test.*', 'src/**/*.spec.*', 'src/**/__tests__/**'],
             rollupTypes: false
-        })
+        }),
+        injectCss()
     ],
     build: {
         // 1. Use Terser instead of Esbuild to better preserve directives

@@ -2,27 +2,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { useDialogStore } from '@/store/dialogStore'
+import storeDialog from '@/store/dialog'
 import useHookDialog from '@/hooks/useHookDialog'
 
 // Mock useBaseModal and components from @rokku-x/react-hook-modal
 vi.mock('@rokku-x/react-hook-modal', async () => {
+    // Provide both the hook and the shared store API used by `store/dialog`.
+    const pushModal = vi.fn((id, el) => id);
+    const popModal = vi.fn((id) => true);
     return {
         ModalBackdrop: ({ children }: any) => <div>{children}</div>,
         ModalWindow: ({ children }: any) => <div>{children}</div>,
         useBaseModal: () => ({
-            pushModal: vi.fn((id, el) => id),
-            popModal: vi.fn((id) => true),
+            pushModal,
+            popModal,
             updateModal: vi.fn(() => true),
         }),
+        // `storeBaseModal` is the zustand store instance used by the library store.
+        storeBaseModal: {
+            getState: () => ({ actions: { pushModal, popModal } })
+        }
     }
 })
 
 describe('useHookDialog', () => {
     beforeEach(() => {
         // reset store before each test
-        const { instances } = useDialogStore.getState()
-        if (instances.length) useDialogStore.setState({ instances: [] })
+        const { instances } = storeDialog.getState()
+        if (instances.length) storeDialog.setState({ instances: [] })
     })
 
     afterEach(() => {
@@ -39,7 +46,7 @@ describe('useHookDialog', () => {
         })
 
         // There should be one instance in the store
-        const instances = useDialogStore.getState().instances
+        const instances = storeDialog.getState().instances
         expect(instances.length).toBe(1)
         const inst = instances[0]
 
@@ -57,7 +64,7 @@ describe('useHookDialog', () => {
             promise = result.current[0]({ title: 'Test Cancel', actions: [[{ title: 'Cancel', isCancel: true }]] })
         })
 
-        const inst = useDialogStore.getState().instances[0]
+        const inst = storeDialog.getState().instances[0]
 
         act(() => inst.reject(new Error('cancelled')))
 
@@ -72,7 +79,7 @@ describe('useHookDialog', () => {
             result.current[0]({ title: 'Merged' })
         })
 
-        const inst = useDialogStore.getState().instances[0]
+        const inst = storeDialog.getState().instances[0]
         expect(inst.config.showCloseButton).toBe(true)
         expect(inst.config.styles?.dialog?.maxWidth).toBe('600px')
     })

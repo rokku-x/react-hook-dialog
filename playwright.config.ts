@@ -1,13 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: 'tests',
+  testDir: 'screenshotTest',
   timeout: 30_000,
   expect: { timeout: 5000 },
   fullyParallel: false,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    headless: true,
+    headless: false,
     viewport: { width: 500, height: 500 },
     actionTimeout: 5000
   },

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BaseModalRenderer, useHookDialog } from '/src';
+import { BaseDialogRenderer, useHookDialog } from '/src';
 
 import Examples from './examples';
 
@@ -20,7 +20,7 @@ export default function App() {
             <li key={i}><a href={`?example=${i + 1}`}>Example {i + 1}</a></li>
           ))}
         </ul>
-        <BaseModalRenderer />
+        <BaseDialogRenderer />
       </div>
     );
   }
@@ -34,7 +34,7 @@ export default function App() {
     <div>
       <h2 className="example-title">Example {exampleId}</h2>
       <p className="info">This will automatically open the dialog for the selected example.</p>
-      <BaseModalRenderer />
+      <BaseDialogRenderer defaultConfig={{ showCloseButton: true, backdropCancel: true }} />
       <ExampleComponent />
     </div>
   );

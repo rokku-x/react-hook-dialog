@@ -4,6 +4,7 @@ import { FormDataToObject, IsForm } from "@/utils/utils";
 import { ModalBackdrop, ModalWindow as ModalWindowBase } from "@rokku-x/react-hook-modal";
 import React, { useEffect, useRef } from "react";
 import type { ModalAction, ModalWindowProps } from '@/types'
+import './ModalWindow.css'
 
 // Some modal window implementations may not forward refs in their type definitions.
 // Create a typed alias that asserts `ModalWindowBase` can accept a ref to an HTMLDivElement
@@ -112,30 +113,16 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                         className={`hook-dialog-close-button ${classNames.closeButton || ''}`}
                         aria-label="Close"
                         onClick={() => handleClose(modalWindowId)}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            right: 0,
-                            transform: "translate(75%, -75%)",
-                            width: 32,
-                            height: 32,
-                            background: "none",
-                            border: "none",
-                            fontSize: 21,
-                            cursor: "pointer",
-                            lineHeight: 1,
-                            color: "#555",
-                            ...styles.closeButton,
-                        }}
+                        style={styles.closeButton}
                     >
                         ×
                     </button>
                 )}
 
-                {title && <h3 id={`${modalWindowId}-title`} className={`hook-dialog-title ${classNames.title || ''}`} style={{ margin: "0 0 15px", fontSize: 20, ...styles.title }}>{title}</h3>}
-                {content && <div className={`hook-dialog-content ${classNames.content || ''}`} style={{ marginBottom: 15, color: "#555", ...styles.content }}>{content}</div>}
+                {title && <h3 id={`${modalWindowId}-title`} className={`hook-dialog-title ${classNames.title || ''}`} style={styles.title}>{title}</h3>}
+                {content && <div className={`hook-dialog-content ${classNames.content || ''}`} style={styles.content}>{content}</div>}
 
-                <div className={`hook-dialog-actions ${classNames.actions || ''}`} style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 15, ...styles.actions }}>
+                <div className={`hook-dialog-actions ${classNames.actions || ''}`} style={styles.actions}>
                     {actionRows.map((row, rowIndex) => {
                         const leftActions = row.filter((a) => a.isOnLeft);
                         const rightActions = row.filter((a) => !a.isOnLeft);
@@ -161,15 +148,6 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                                     }
                                     }
                                     style={{
-                                        ...{
-                                            border: "none",
-                                            borderRadius: 15,
-                                            padding: "10px 18px",
-                                            fontSize: 14,
-                                            fontWeight: 800,
-                                            cursor: "pointer",
-
-                                        },
                                         ...variantStyle,
                                         ...styles.actionButton,
                                         ...(action.style || {}),
@@ -181,11 +159,11 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                         };
 
                         return (
-                            <div key={rowIndex} className={`hook-dialog-actions-row ${classNames.actionsRow || ''}`} style={{ display: "flex", gap: 8, justifyContent: "space-between", ...styles.actionsRow }}>
-                                <div className="hook-dialog-actions-left" style={{ display: "flex", gap: 8 }}>
+                            <div key={rowIndex} className={`hook-dialog-actions-row ${classNames.actionsRow || ''}`} style={styles.actionsRow}>
+                                <div className="hook-dialog-actions-left">
                                     {leftActions.map((action, idx) => renderButton(action, idx))}
                                 </div>
-                                <div className="hook-dialog-actions-right" style={{ display: "flex", gap: 8 }}>
+                                <div className="hook-dialog-actions-right">
                                     {rightActions.map((action, idx) => renderButton(action, idx))}
                                 </div>
                             </div>

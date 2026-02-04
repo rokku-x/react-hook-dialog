@@ -26,7 +26,7 @@
         "vitest": "^1.6.1",
       },
       "peerDependencies": {
-        "@rokku-x/react-hook-modal": "^0.9.0",
+        "@rokku-x/react-hook-modal": "^0.9.4",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
         "zustand": "^5.0.10",
@@ -224,7 +224,7 @@
 
     "@playwright/test": ["@playwright/test@1.58.1", "", { "dependencies": { "playwright": "1.58.1" }, "bin": { "playwright": "cli.js" } }, "sha512-6LdVIUERWxQMmUSSQi0I53GgCBYgM2RpGngCPY7hSeju+VrKjq3lvs7HpJoPbDiY5QM5EYRtRX5fvrinnMAz3w=="],
 
-    "@rokku-x/react-hook-modal": ["@rokku-x/react-hook-modal@0.9.0", "", { "peerDependencies": { "react": "^18.0.0", "react-dom": "^18.0.0", "zustand": "^5.0.10" } }, "sha512-s79dJoYfNVMBlh3VZaUgIBoCUT02NUIcbctsT6+y5VejVy55usUpW/RUYG6uCAJpwyfjtnMkhTh0UWyBRFfPug=="],
+    "@rokku-x/react-hook-modal": ["@rokku-x/react-hook-modal@0.9.4", "", { "peerDependencies": { "react": "^18.0.0", "react-dom": "^18.0.0", "zustand": "^5.0.10" } }, "sha512-HTwsC5qmhrUyto3qF+HmFZf92tncousI99jLSI50f6M9DhwxSSBXRWPG+WDY+CxxAtdUL+5iPKnqqhul8Mebgw=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.53", "", {}, "sha512-vENRlFU4YbrwVqNDZ7fLvy+JR1CRkyr01jhSiDpE1u6py3OMzQfztQU2jxykW3ALNxO4kSlqIDeYyD0Y9RcQeQ=="],
 
