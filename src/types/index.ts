@@ -293,3 +293,24 @@ interface HandleActionCallback {
  * Friendly Form Data object type
  */
 export type FormDataObject = Record<string, FormDataEntryValue | FormDataEntryValue[]>;
+
+/** Function type for requesting a dialog*/
+export interface RequestDialog<U> {
+    <U = FormDataObject>(config: ConfirmConfig & { isReturnSubmit: true }): RequestDialogReturnType<U>;
+    <U = ValidValue>(config: ConfirmConfig): RequestDialogReturnType<U>;
+}
+
+/** Context information for a dialog instance */
+export type DialogInstanceContext = {
+    id: string;
+    config: any;
+    forceCancel: (forceReject?: boolean) => void,
+    forceAction: (action: ModalAction) => void,
+    forceDefault: () => void
+};
+
+/** Return type of the requestDialog function with added context property */
+export type RequestDialogReturnType<T> = Promise<T> & { id: string, context: DialogInstanceContext };
+
+/** Return type of the useHookDialog hook */
+export type UseHookDialogReturnType<T> = [requestDialog: RequestDialog<T>, getContext: (id: string) => DialogInstanceContext]; 

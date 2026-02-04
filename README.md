@@ -96,7 +96,57 @@ useHookDialog(defaultConfig?: UseHookDialogConfig)
 
 | Return Value | Type | Description |
 |---|---|---|
-| `requestDialog` | `(config: ConfirmConfig) => Promise<ValidValue>` | Function to open a dialog and get user response |
+| `requestDialog` | `(config: ConfirmConfig) => RequestDialogReturnType<ValidValue>` | Function to open a dialog and get user response. `RequestDialogReturnType<T>` is defined as `Promise<T> & { id: string; context: DialogInstanceContext }` which means the native Promise resolves with `T` while the *returned* value exposes `id` and `context` for programmatic control. |
+
+```typescript
+// Convenience alias shown in the library
+type RequestDialogReturnType<T> = Promise<T> & { id: string; context: DialogInstanceContext };
+```
+
+### Dialog Context & Force Functions ✅
+
+The Promise returned from `requestDialog(...)` is augmented with:
+
+- `id: string` — unique identifier for the dialog instance
+- `context: DialogInstanceContext` — helper methods to programmatically control the dialog instance
+
+You can access the context either directly from the returned Promise (`promise.context`) or via the second value returned from the hook (`getContext(id)`).
+
+Dialog context methods:
+
+- `forceCancel(forceReject?: boolean)` — close the dialog as a cancellation. If `forceReject` is `true` the promise will be rejected even if the dialog `rejectOnCancel` config is `false`. Otherwise the usual `rejectOnCancel` behavior applies.
+- `forceAction(action: ModalAction)` — programmatically trigger a specific action (resolve/reject according to the action and dialog config).
+- `forceDefault()` — triggers the dialog's default action (first action marked with `isFocused`). Throws if no default action is defined.
+
+Example usage:
+
+```tsx
+const [requestDialog, getContext] = useHookDialog();
+
+// open a dialog and get the augmented promise
+const p = requestDialog({
+  title: 'Confirm',
+  content: 'Proceed?',
+  actions: [[
+    { title: 'Cancel', isCancel: true },
+    { title: 'OK', value: true, isFocused: true }
+  ]]
+});
+
+console.log('dialog id:', p.id);
+
+// force the default action (same as clicking the focused action)
+p.context.forceDefault();
+
+// or cancel programmatically (forces reject by default)
+p.context.forceCancel();
+
+// you can also use the helper returned from the hook
+const ctx = getContext(p.id);
+ctx.forceAction({ title: 'OK', value: true });
+```
+
+> Note: `forceDefault()` will throw if no action is marked with `isFocused`. Use `forceAction(...)` to explicitly specify which action to run.
 
 #### Default Config Options
 
