@@ -33,7 +33,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "zustand": "^5.0.10",
-    "@rokku-x/react-hook-modal": "^0.9.4"
+    "@rokku-x/react-hook-modal": "^0.10.0"
   },
   "exports": {
     ".": {
@@ -87,7 +87,23 @@
     "dialog-box",
     "confirmation-dialog",
     "react-dialog",
-    "react-modal"
+    "react-modal",
+    "hooks",
+    "modal-dialog",
+    "modal-window",
+    "overlay",
+    "overlays",
+    "popup",
+    "toast",
+    "form",
+    "spinner",
+    "loading",
+    "ui-blocker",
+    "blocker",
+    "portal",
+    "accessibility",
+    "a11y",
+    "library"
   ],
   "license": "MIT",
   "publishConfig": {
