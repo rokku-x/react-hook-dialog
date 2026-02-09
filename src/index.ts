@@ -1,3 +1,4 @@
+'use client'
 /**
  * @packageDocumentation
  * react-hook-dialog - A powerful and flexible React dialog hook library
