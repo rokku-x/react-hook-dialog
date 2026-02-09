@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml/badge.svg)](https://github.com/rokku-x/react-hook-dialog/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![license](https://img.shields.io/npm/l/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) [![downloads](https://img.shields.io/npm/dm/@rokku-x/react-hook-dialog.svg)](https://www.npmjs.com/package/@rokku-x/react-hook-dialog) ![TS](https://img.shields.io/badge/TS-%E2%9C%93-blue)
 
+<p><a href="https://jgd.qzz.io/rhd.png"><img src="https://jgd.qzz.io/rhd.png" alt="react-hook-dialog Logo" width="600"/></a></p>
+
 A lightweight, powerful, and flexible React dialog hook library for confirmation dialogs, alerts, and modals. Built on top of `@rokku-x/react-hook-modal` with a focus on dialog-specific features like action buttons, variants, and customizable styling.
 
 ## Features
