@@ -299,6 +299,42 @@ import { BaseDialogRenderer } from '@rokku-x/react-hook-dialog';
 
 > Note: `BaseModalRenderer` from `@rokku-x/react-hook-modal` can still be used directly if you prefer — this wrapper only adds `defaultConfig` convenience.
 
+### Multiple renderer instances 🔁
+
+You can mount multiple modal renderers (either `BaseDialogRenderer` from this package or the upstream `BaseModalRenderer`) and give each a unique `id`. Use the `instanceId` option (in the hook's `defaultConfig` or per-call `ConfirmConfig`) to target which renderer/store should manage the dialog.
+
+- Mount two renderers:
+
+```tsx
+<BaseDialogRenderer id="primary" defaultConfig={{ showCloseButton: false }} />
+<BaseDialogRenderer id="secondary" defaultConfig={{ showCloseButton: true }} />
+```
+
+- Use the hook with a default instance:
+
+```tsx
+const [requestDialog] = useHookDialog({ instanceId: 'secondary' });
+await requestDialog({ title: 'Settings' });
+```
+
+- Or target a renderer per call:
+
+```tsx
+const [requestDialog] = useHookDialog();
+await requestDialog({ title: 'Switch', instanceId: 'primary' });
+```
+
+- Programmatic store access:
+
+```ts
+import storeDialog from '@rokku-x/react-hook-dialog';
+const primaryStore = storeDialog('primary'); // returns the zustand store hook
+const state = primaryStore.getState();
+primaryStore.setState({ rendererDefaultConfig: { /* ... */ } });
+```
+
+> Note: The default instance id is `"default"`. Make sure you mount a renderer with the same `id` if you want dialogs to be visible. If a renderer with the requested id is not mounted, the store will still be created and you can use it programmatically, but dialogs will not be rendered until a matching renderer is mounted.
+
 ### Backdrop
 
 Overlay component that wraps dialog windows.

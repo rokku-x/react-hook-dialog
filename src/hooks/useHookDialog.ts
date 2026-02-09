@@ -40,8 +40,8 @@ import type { FormDataObject, ConfirmConfig, ConfirmInstance, UseHookDialogConfi
  * ```
  */
 export default function useHookDialog<T = ValidValue>(defaultConfig?: UseHookDialogConfig) {
-    const baseModalInstance = useBaseModal();
-    const { addInstance, handleAction, handleClose, rendererDefaultConfig } = storeDialog();
+    const baseModalInstance = useBaseModal({ rendererId: defaultConfig?.instanceId });
+    const { addInstance, handleAction, handleClose, rendererDefaultConfig } = storeDialog(defaultConfig?.instanceId)();
     // Overloads allow consumers to narrow the Promise result type:
     // - When `isReturnSubmit: true` is provided in the config, the default result is a `FormDataObject` (but can be overridden via generic)
     // - Otherwise the default is `T` (the hook's generic)

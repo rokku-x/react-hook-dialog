@@ -3,7 +3,6 @@ import { UseHookDialogConfig } from "@/types";
 import { BaseModalRenderer, ModalWindowProps } from "@rokku-x/react-hook-modal";
 import { useEffect } from "react";
 
-
 // Wrapper around the base modal renderer to set default config
 // BaseModalRenderer can still be used directly, but this wrapper allows setting defaultConfig via props
 /**
@@ -15,7 +14,7 @@ import { useEffect } from "react";
  * @internal
  */
 export default function BaseDialogRenderer({ defaultConfig, ...rest }: ModalWindowProps & { defaultConfig?: UseHookDialogConfig }) {
-    const { setDefaultConfig } = storeDialog();
+    const { setDefaultConfig } = storeDialog(rest.id)();
 
     useEffect(() => {
         setDefaultConfig(defaultConfig || {});

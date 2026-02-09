@@ -225,6 +225,9 @@ export interface ConfirmConfig {
  * ```
  */
 export interface UseHookDialogConfig {
+    /** Optional instance ID for the dialog store (default: 'default') */
+    instanceId?: string;
+
     /** If true, allows closing dialogs by clicking the backdrop (default: false) */
     backdropCancel?: boolean;
 

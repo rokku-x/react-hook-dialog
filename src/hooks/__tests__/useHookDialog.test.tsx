@@ -18,18 +18,18 @@ vi.mock('@rokku-x/react-hook-modal', async () => {
             popModal,
             updateModal: vi.fn(() => true),
         }),
-        // `storeBaseModal` is the zustand store instance used by the library store.
-        storeBaseModal: {
+        // `storeBaseModal` is the zustand store factory used by the library store.
+        storeBaseModal: (id?: string) => ({
             getState: () => ({ actions: { pushModal, popModal } })
-        }
+        })
     }
 })
 
 describe('useHookDialog', () => {
     beforeEach(() => {
         // reset store before each test
-        const { instances } = storeDialog.getState()
-        if (instances.length) storeDialog.setState({ instances: [] })
+        const { instances } = storeDialog().getState()
+        if (instances.length) storeDialog().setState({ instances: [] })
     })
 
     afterEach(() => {
@@ -46,7 +46,7 @@ describe('useHookDialog', () => {
         })
 
         // There should be one instance in the store
-        const instances = storeDialog.getState().instances
+        const instances = storeDialog().getState().instances
         expect(instances.length).toBe(1)
         const inst = instances[0]
 
@@ -64,7 +64,7 @@ describe('useHookDialog', () => {
             promise = result.current[0]({ title: 'Test Cancel', actions: [[{ title: 'Cancel', isCancel: true }]] })
         })
 
-        const inst = storeDialog.getState().instances[0]
+        const inst = storeDialog().getState().instances[0]
 
         act(() => inst.reject(new Error('cancelled')))
 
@@ -79,7 +79,7 @@ describe('useHookDialog', () => {
             result.current[0]({ title: 'Merged' })
         })
 
-        const inst = storeDialog.getState().instances[0]
+        const inst = storeDialog().getState().instances[0]
         expect(inst.config.showCloseButton).toBe(true)
         expect(inst.config.styles?.dialog?.maxWidth).toBe('600px')
     })
