@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.3
+
+### Patch Changes
+
+- 3f0a9d3: feat: enhance CSS injection in Vite config to support ESM and CJS output
+
 ## 1.2.2
 
 ### Patch Changes
