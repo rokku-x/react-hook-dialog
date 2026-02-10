@@ -33,7 +33,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "zustand": "^5.0.10",
-    "@rokku-x/react-hook-modal": "^0.10.0"
+    "@rokku-x/react-hook-modal": "0.10.1"
   },
   "exports": {
     ".": {
@@ -125,6 +125,7 @@
   },
   "sideEffects": [
     "*.css",
+    "*.css*",
     "*.scss"
   ],
   "types": "dist/index.d.ts",
