@@ -1,5 +1,13 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.1
+
+### Patch Changes
+
+- 780e345: chore: update @rokku-x/react-hook-modal to version 0.10.0 and enhance README with logo
+- 780e345: patch: enable client-side rendering by adding 'use client' directive
+- f7b3cac: feat: enhance dialog management by adding optional instance ID to UseHookDialogConfig and updating storeDialog usage
+
 ## 1.2.0
 
 ### Minor Changes
