@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.2
+
+### Patch Changes
+
+- 40edd81: fix: update @rokku-x/react-hook-modal version to 0.10.1
+
 ## 1.2.1
 
 ### Patch Changes
