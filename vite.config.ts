@@ -5,7 +5,6 @@ import path from 'path'
 import pkg from './package.json';
 import preserveDirectives from 'rollup-plugin-preserve-directives';
 
-// Custom plugin to inject CSS into JS
 function injectCss() {
     return {
         name: 'inject-css',
@@ -15,20 +14,41 @@ function injectCss() {
             const cssContent = cssFiles.map(key => bundle[key].source).join('');
 
             if (cssContent) {
-                let injectCode = `
-                    if (typeof document !== 'undefined') {
-                    const style = document.createElement('style');
-                    style.textContent = ${JSON.stringify(cssContent)};
-                    document.head.appendChild(style);
-                }`;
+                const esmFileName = 'index.css.esm.js';
+                const cjsFileName = 'index.css.cjs.js';
 
-                injectCode = injectCode.replace(/\s+/g, ' ').trim();
+                const esmCode = `const css = ${JSON.stringify(cssContent)};\nif (typeof document !== 'undefined') { const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style); }\nexport default css;`;
+                const cjsCode = `const css = ${JSON.stringify(cssContent)};\nif (typeof document !== 'undefined') { const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style); }\nmodule.exports = css;`;
+
+                bundle[esmFileName] = {
+                    fileName: esmFileName,
+                    isEntry: false,
+                    type: 'chunk',
+                    code: esmCode,
+                    imports: [],
+                    exports: ['default'],
+                    modules: {}
+                };
+                bundle[cjsFileName] = {
+                    fileName: cjsFileName,
+                    isEntry: false,
+                    type: 'chunk',
+                    code: cjsCode,
+                    imports: [],
+                    exports: ['default'],
+                    modules: {}
+                };
+
                 const entryKeys = Object.keys(bundle).filter(key =>
                     (key === 'index.esm.js' || key === 'index.cjs.js') && bundle[key].type === 'chunk'
                 );
                 entryKeys.forEach(key => {
                     const chunk = bundle[key];
-                    chunk.code = chunk.code + '\n' + injectCode;
+                    if (key === 'index.esm.js') {
+                        chunk.code = chunk.code + `import './${esmFileName}';`;
+                    } else if (key === 'index.cjs.js') {
+                        chunk.code = chunk.code + `require('./${cjsFileName}');`;
+                    }
                 });
             }
         }
