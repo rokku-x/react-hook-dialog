@@ -43,6 +43,7 @@
     },
     "./react-hook-dialog.css": "./dist/react-hook-dialog.css",
     "./dist/react-hook-dialog.css": "./dist/react-hook-dialog.css",
+    "./react-hook-modal.css": "./node_modules/@rokku-x/react-hook-modal/dist/react-hook-modal.css",
     "./package.json": "./package.json"
   },
   "bugs": {

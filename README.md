@@ -74,6 +74,22 @@ function App() {
 
 Either component is fine — `BaseDialogRenderer` simply sets the dialog defaults for you so consumers of `useHookDialog()` don't have to provide them on each call.
 
+## Import Styles of Sub Modules
+
+- Import the upstream package to let it inject styles for you:
+```ts
+import '@rokku-x/react-hook-modal';
+```
+
+- Or import the upstream modal CSS (provided by `@rokku-x/react-hook-modal`) at the project root:
+```ts
+import '@rokku-x/react-hook-dialog/react-hook-modal.css';
+OR
+import '@rokku-x/react-hook-modal/react-hook-modal.css';
+```
+
+Choose the option that fits your build setup (explicit CSS import or automatic injection).
+
 ### 2. Use useHookDialog Hook
 
 ```tsx
