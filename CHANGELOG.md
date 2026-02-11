@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.4
+
+### Patch Changes
+
+- d260d85: docs: update README to include style import options for submodules
+
 ## 1.2.3
 
 ### Patch Changes
