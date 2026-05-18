@@ -4,12 +4,14 @@ import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import storeDialog from '@/store/dialog'
 import useHookDialog from '@/hooks/useHookDialog'
+import type { RequestDialogReturnType } from '@/types'
+
+const pushModal = vi.fn((id, el) => id);
+const popModal = vi.fn((id) => true);
 
 // Mock useBaseModal and components from @rokku-x/react-hook-modal
 vi.mock('@rokku-x/react-hook-modal', async () => {
     // Provide both the hook and the shared store API used by `store/dialog`.
-    const pushModal = vi.fn((id, el) => id);
-    const popModal = vi.fn((id) => true);
     return {
         ModalBackdrop: ({ children }: any) => <div>{children}</div>,
         ModalWindow: ({ children }: any) => <div>{children}</div>,
@@ -82,5 +84,15 @@ describe('useHookDialog', () => {
         const inst = storeDialog().getState().instances[0]
         expect(inst.config.showCloseButton).toBe(true)
         expect(inst.config.styles?.dialog?.maxWidth).toBe('600px')
+    })
+
+    it('only pushes the modal once when requesting a dialog', () => {
+        const { result } = renderHook(() => useHookDialog())
+
+        act(() => {
+            result.current[0]({ title: 'Single push' })
+        })
+
+        expect(pushModal).toHaveBeenCalledTimes(1)
     })
 })

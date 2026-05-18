@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useBaseModal } from '@rokku-x/react-hook-modal';
 import ModalWindow from "@/components/ModalWindow";
 import storeDialog from "@/store/dialog";
-import type { FormDataObject, ConfirmConfig, ConfirmInstance, UseHookDialogConfig, ValidValue, ModalAction } from '@/types'
+import type { FormDataObject, ConfirmConfig, ConfirmInstance, RequestDialogReturnType, UseHookDialogConfig, UseHookDialogReturnType, ValidValue, ModalAction } from '@/types'
 
 /**
  * Hook for displaying confirmation dialogs and alerts.
@@ -11,8 +11,8 @@ import type { FormDataObject, ConfirmConfig, ConfirmInstance, UseHookDialogConfi
  * Dialogs can be customized with titles, content, action buttons, and styling.
  * 
  * @param defaultConfig - Optional default configuration applied to all dialogs created by this hook
- * @returns A tuple containing the requestDialog function
- * 
+ * @returns A tuple containing the requestDialog function and getContext helper
+ *
  * @example
  * ```tsx
  * const [requestDialog] = useHookDialog();
@@ -39,48 +39,62 @@ import type { FormDataObject, ConfirmConfig, ConfirmInstance, UseHookDialogConfi
  * });
  * ```
  */
-export default function useHookDialog<T = ValidValue>(defaultConfig?: UseHookDialogConfig) {
+export default function useHookDialog<T = ValidValue>(defaultConfig?: UseHookDialogConfig): UseHookDialogReturnType<T> {
     const baseModalInstance = useBaseModal({ rendererId: defaultConfig?.instanceId });
-    const { addInstance, handleAction, handleClose, rendererDefaultConfig } = storeDialog(defaultConfig?.instanceId)();
+    const { addInstance, handleAction, handleClose, rendererDefaultConfig, getContext } = storeDialog(defaultConfig?.instanceId)();
     // Overloads allow consumers to narrow the Promise result type:
     // - When `isReturnSubmit: true` is provided in the config, the default result is a `FormDataObject` (but can be overridden via generic)
     // - Otherwise the default is `T` (the hook's generic)
-    function requestDialog<U = FormDataObject>(config: ConfirmConfig & { isReturnSubmit: true }): Promise<U>
-    function requestDialog<U = T>(config: ConfirmConfig): Promise<U>
-    function requestDialog<U = any>(config: ConfirmConfig): Promise<U> {
-        return new Promise<U>((resolve, reject) => {
-            const id = Math.random().toString(36).substring(2, 6);
-            const mergedConfig: ConfirmConfig = {
-                ...rendererDefaultConfig,
-                ...defaultConfig,
-                ...config,
-                classNames: {
-                    ...rendererDefaultConfig?.classNames,
-                    ...defaultConfig?.classNames,
-                    ...config.classNames,
-                },
-                styles: {
-                    ...rendererDefaultConfig?.styles,
-                    ...defaultConfig?.styles,
-                    ...config.styles,
-                },
-                variantStyles: {
-                    ...rendererDefaultConfig?.variantStyles,
-                    ...defaultConfig?.variantStyles,
-                    ...config.variantStyles,
-                }
-            };
-            const newInstance: ConfirmInstance<U> = {
-                id,
-                config: mergedConfig,
-                resolve,
-                reject,
-            };
-            addInstance(newInstance);
+    function requestDialog<U = FormDataObject>(config: ConfirmConfig & { isReturnSubmit: true }): RequestDialogReturnType<U>
+    function requestDialog<U = T>(config: ConfirmConfig): RequestDialogReturnType<U>
+    function requestDialog<U = any>(config: ConfirmConfig): RequestDialogReturnType<U> {
+        const id = Math.random().toString(36).substring(2, 6);
+        const mergedConfig: ConfirmConfig = {
+            ...rendererDefaultConfig,
+            ...defaultConfig,
+            ...config,
+            classNames: {
+                ...rendererDefaultConfig?.classNames,
+                ...defaultConfig?.classNames,
+                ...config.classNames,
+            },
+            styles: {
+                ...rendererDefaultConfig?.styles,
+                ...defaultConfig?.styles,
+                ...config.styles,
+            },
+            variantStyles: {
+                ...rendererDefaultConfig?.variantStyles,
+                ...defaultConfig?.variantStyles,
+                ...config.variantStyles,
+            }
+        };
 
-            newInstance.id = baseModalInstance.pushModal(id, React.createElement(ModalWindow, { config: mergedConfig, modalWindowId: id, handleClose, handleAction }));
-        });
-    };
+        let resolveFn!: (value: U) => void;
+        let rejectFn!: (reason?: any) => void;
 
-    return [requestDialog];
+        const promise = new Promise<U>((resolve, reject) => {
+            resolveFn = resolve;
+            rejectFn = reject;
+        }) as RequestDialogReturnType<U>;
+
+        const newInstance: ConfirmInstance<U> = {
+            id,
+            config: mergedConfig,
+            resolve: resolveFn,
+            reject: rejectFn,
+        };
+
+        addInstance(newInstance);
+
+        const context = getContext(id);
+        if (!context) throw new Error(`Dialog context for id ${id} could not be retrieved.`);
+
+        promise.id = id;
+        promise.context = context;
+
+        return promise;
+    }
+
+    return [requestDialog, getContext];
 }

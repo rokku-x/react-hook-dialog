@@ -1,5 +1,5 @@
 import ModalWindow from '@/components/ModalWindow';
-import type { ConfirmInstance, ModalAction, UseHookDialogConfig, ValidValue } from '@/types';
+import type { ConfirmInstance, DialogInstanceContext, ModalAction, UseHookDialogConfig, ValidValue } from '@/types';
 import { storeBaseModal } from '@rokku-x/react-hook-modal';
 import React from 'react';
 import { create } from 'zustand';
@@ -35,7 +35,7 @@ interface DialogStore<T = ValidValue> {
     getInstance: (id: string) => ConfirmInstance<T> | undefined;
 
     /** Get the context of a dialog instance by ID */
-    getContext: (id: string) => { id: string; config: any; forceCancel: () => void } | undefined;
+    getContext: (id: string) => DialogInstanceContext;
 }
 
 function createStore(instanceId: string = 'default') {

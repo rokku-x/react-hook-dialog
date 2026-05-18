@@ -45,6 +45,7 @@
  */
 export { BaseModalRenderer } from '@rokku-x/react-hook-modal';
 export { default as BaseDialogRenderer } from '@/components/BaseDialogRenderer';
+export { default as storeDialog } from '@/store/dialog';
 
 /**
  * Main hook for displaying confirmation dialogs and alerts.

@@ -1,5 +1,4 @@
 
-import { baseVariantStyles } from "@/constants/theme";
 import { FormDataToObject, IsForm } from "@/utils/utils";
 import { ModalBackdrop, ModalWindow as ModalWindowBase } from "@rokku-x/react-hook-modal";
 import React, { useEffect, useRef } from "react";
@@ -29,14 +28,14 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
     const { actions = [], title, backdropCancel, showCloseButton, classNames = {}, styles = {}, variantStyles = {} } = config;
     let { content } = config;
 
-    const actionRows: ModalAction[][] = (actions.length ? actions : [[{ title: "OK", variant: "primary" }]] as ModalAction[][]).filter((row) => row && row.length);
-    const mergedVariantStyles = { ...baseVariantStyles, ...variantStyles } as Record<string, React.CSSProperties>;
+    const actionRows = (actions.length ? actions : [[{ title: "OK", variant: "primary" }]] as ModalAction[][]).filter((row) => row && row.length);
 
     const onBackdropClick = () => backdropCancel && handleClose(modalWindowId);
 
     const dialogRef = useRef<HTMLDivElement | null>(null);
     const focusedActionRef = useRef<HTMLElement | null>(null);
     const formRef = useRef<HTMLFormElement | null>(null);
+    const focusableSelector = "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -44,54 +43,116 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
 
         const previouslyFocused = document.activeElement as HTMLElement | null;
 
-        // If an action requests initial focus (via ref), prefer it
+        const getFocusableElements = () =>
+            Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+                (el): el is HTMLElement => Boolean(el),
+            );
+
+        const focusFirstElement = () => {
+            const focusable = getFocusableElements();
+            if (focusable.length) focusable[0].focus();
+            else dialog.focus();
+        };
+
         if (focusedActionRef.current) {
             focusedActionRef.current.focus();
         } else {
-            // Focus first focusable element (close button or first action) or dialog
-            const focusable = dialog.querySelector<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
-            if (focusable) focusable.focus();
-            else {
-                dialog.setAttribute('tabindex', '-1');
-                dialog.focus();
-            }
+            focusFirstElement();
         }
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                e.stopPropagation();
+                e.preventDefault();
                 handleClose(modalWindowId);
-            } else if (e.key === 'Tab') {
-                // Focus trapping
-                const els = Array.from(dialog.querySelectorAll<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")).filter(Boolean);
-                if (els.length === 0) {
+                return;
+            }
+
+            if (e.key !== 'Tab') return;
+
+            const focusable = getFocusableElements();
+            if (focusable.length === 0) {
+                e.preventDefault();
+                return;
+            }
+
+            const firstEl = focusable[0];
+            const lastEl = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstEl) {
                     e.preventDefault();
-                    return;
+                    lastEl.focus();
                 }
-                const firstEl = els[0];
-                const lastEl = els[els.length - 1];
-                if (e.shiftKey) {
-                    if (document.activeElement === firstEl) {
-                        e.preventDefault();
-                        lastEl.focus();
-                    }
-                } else {
-                    if (document.activeElement === lastEl) {
-                        e.preventDefault();
-                        firstEl.focus();
-                    }
-                }
+            } else if (document.activeElement === lastEl) {
+                e.preventDefault();
+                firstEl.focus();
             }
         };
 
-        dialog.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keydown', handleKeyDown);
         return () => {
-            dialog.removeEventListener('keydown', handleKeyDown);
-            if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+            document.removeEventListener('keydown', handleKeyDown);
+            previouslyFocused?.focus?.();
         };
-    }, [handleClose, modalWindowId]);
+    }, [handleClose, modalWindowId, focusableSelector]);
 
-    IsForm(content) && (content = React.cloneElement(content as React.ReactElement, { ref: formRef }));
+    if (IsForm(content)) {
+        content = React.cloneElement(content as React.ReactElement, { ref: formRef });
+    }
+
+    const renderButton = (action: ModalAction, idx: number) => {
+        const variantStyle = variantStyles[action.variant || 'secondary'];
+        const className = [
+            'hook-dialog-action-button',
+            `hook-dialog-action-${action.variant || 'secondary'}`,
+            classNames.actionButton,
+            action.className,
+        ]
+            .filter(Boolean)
+            .join(' ');
+
+        const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+            try {
+                action.onClick?.(e, action);
+            } catch {
+                // Keep modal stable even if onClick throws.
+            }
+
+            if (action.isSubmit && config.isReturnSubmit && formRef.current) {
+                return handleAction(modalWindowId, action, FormDataToObject(new FormData(formRef.current)));
+            }
+
+            if (action.isSubmit) {
+                formRef.current?.requestSubmit();
+            }
+
+            if (action.noActionReturn) {
+                e.stopPropagation();
+                return;
+            }
+
+            handleAction(modalWindowId, action);
+        };
+
+        return (
+            <button
+                key={`${action.title}-${idx}`}
+                ref={(el) => {
+                    if (action.isFocused && el) focusedActionRef.current = el;
+                }}
+                data-action-focused={action.isFocused ? 'true' : undefined}
+                className={className}
+                onClick={handleButtonClick}
+                style={{
+                    ...variantStyle,
+                    ...styles.actionButton,
+                    ...(action.style || {}),
+                }}
+            >
+                {action.title}
+            </button>
+        );
+    };
 
     return (
         <ModalBackdrop
@@ -106,11 +167,17 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                 aria-labelledby={title ? `${modalWindowId}-title` : undefined}
                 className={classNames.dialog || ''}
                 style={styles.dialog}
+                tabIndex={-1}
             >
                 {showCloseButton && (
                     <button
                         type="button"
-                        className={`hook-dialog-close-button ${classNames.closeButton || ''}`}
+                        className={[
+                            'hook-dialog-close-button',
+                            classNames.closeButton,
+                        ]
+                            .filter(Boolean)
+                            .join(' ')}
                         aria-label="Close"
                         onClick={() => handleClose(modalWindowId)}
                         style={styles.closeButton}
@@ -119,52 +186,37 @@ export default function ModalWindow({ modalWindowId, handleAction, handleClose, 
                     </button>
                 )}
 
-                {title && <h3 id={`${modalWindowId}-title`} className={`hook-dialog-title ${classNames.title || ''}`} style={styles.title}>{title}</h3>}
-                {content && <div className={`hook-dialog-content ${classNames.content || ''}`} style={styles.content}>{content}</div>}
+                {title && (
+                    <h3
+                        id={`${modalWindowId}-title`}
+                        className={['hook-dialog-title', classNames.title].filter(Boolean).join(' ')}
+                        style={styles.title}
+                    >
+                        {title}
+                    </h3>
+                )}
+                {content && (
+                    <div className={['hook-dialog-content', classNames.content].filter(Boolean).join(' ')} style={styles.content}>
+                        {content}
+                    </div>
+                )}
 
-                <div className={`hook-dialog-actions ${classNames.actions || ''}`} style={styles.actions}>
+                <div className={['hook-dialog-actions', classNames.actions].filter(Boolean).join(' ')} style={styles.actions}>
                     {actionRows.map((row, rowIndex) => {
-                        const leftActions = row.filter((a) => a.isOnLeft);
-                        const rightActions = row.filter((a) => !a.isOnLeft);
-                        const renderButton = (action: ModalAction, idx: number) => {
-                            const variantStyle = mergedVariantStyles[action.variant || 'secondary'] || mergedVariantStyles.secondary;
-
-                            return (
-                                <button
-                                    key={`${action.title}-${idx}`}
-                                    ref={(el) => {
-                                        if (action.isFocused && el) focusedActionRef.current = el;
-                                    }}
-                                    data-action-focused={action.isFocused ? 'true' : undefined}
-                                    className={`hook-dialog-action-button hook-dialog-action-${action.variant || 'secondary'} ${classNames.actionButton || ''} ${action.className || ''}`}
-                                    onClick={(e) => {
-                                        try {
-                                            action.onClick?.(e as React.MouseEvent<HTMLButtonElement>, action);
-                                        } catch { }
-                                        if (action.isSubmit && config.isReturnSubmit && formRef.current) return handleAction(modalWindowId, action, FormDataToObject(new FormData(formRef.current)));
-                                        else if (action.isSubmit) formRef.current?.requestSubmit();
-                                        if (action.noActionReturn) return e.stopPropagation();
-                                        handleAction(modalWindowId, action);
-                                    }
-                                    }
-                                    style={{
-                                        ...variantStyle,
-                                        ...styles.actionButton,
-                                        ...(action.style || {}),
-                                    }}
-                                >
-                                    {action.title}
-                                </button>
-                            );
-                        };
+                        const leftActions = row.filter((action) => action.isOnLeft);
+                        const rightActions = row.filter((action) => !action.isOnLeft);
 
                         return (
-                            <div key={rowIndex} className={`hook-dialog-actions-row ${classNames.actionsRow || ''}`} style={styles.actionsRow}>
+                            <div
+                                key={rowIndex}
+                                className={['hook-dialog-actions-row', classNames.actionsRow].filter(Boolean).join(' ')}
+                                style={styles.actionsRow}
+                            >
                                 <div className="hook-dialog-actions-left">
-                                    {leftActions.map((action, idx) => renderButton(action, idx))}
+                                    {leftActions.map(renderButton)}
                                 </div>
                                 <div className="hook-dialog-actions-right">
-                                    {rightActions.map((action, idx) => renderButton(action, idx))}
+                                    {rightActions.map(renderButton)}
                                 </div>
                             </div>
                         );

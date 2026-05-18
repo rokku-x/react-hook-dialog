@@ -96,10 +96,10 @@ Choose the option that fits your build setup (explicit CSS import or automatic i
 import { useHookDialog } from '@rokku-x/react-hook-dialog';
 
 function MyComponent() {
-  const [requestDialog] = useHookDialog();
+  const [requestDialog, getContext] = useHookDialog();
 
   const handleConfirm = async () => {
-    const result = await requestDialog({
+    const dialog = requestDialog({
       title: 'Confirm Action',
       content: 'Are you sure you want to proceed?',
       actions: [[
@@ -107,7 +107,11 @@ function MyComponent() {
         { title: 'Confirm', variant: 'primary' }
       ]]
     });
-    
+
+    console.log('Dialog id:', dialog.id);
+    console.log('Dialog context:', getContext(dialog.id));
+
+    const result = await dialog;
     console.log('User chose:', result);
   };
 
@@ -148,6 +152,17 @@ type RequestDialogReturnType<T> = Promise<T> & { id: string; context: DialogInst
 ```
 
 > Important: awaiting the returned Promise resolves with the dialog result (`T`). The `id` and `context` properties are available immediately after calling `requestDialog(...)`, allowing programmatic control while the dialog is open.
+>
+> Example:
+> ```ts
+> const [requestDialog, getContext] = useHookDialog();
+> const dialog = requestDialog({ title: 'Confirm', actions: [[{ title: 'OK' }]] });
+> console.log(dialog.id);
+> console.log(getContext(dialog.id).id);
+> await dialog;
+> ```
+>
+> Note: `context` is available immediately, even before the dialog resolves.
 
 ### Dialog Context & Force Functions ✅
 
@@ -331,15 +346,21 @@ You can mount multiple modal renderers (either `BaseDialogRenderer` from this pa
 - Use the hook with a default instance:
 
 ```tsx
-const [requestDialog] = useHookDialog({ instanceId: 'secondary' });
-await requestDialog({ title: 'Settings' });
+const [requestDialog, getContext] = useHookDialog({ instanceId: 'secondary' });
+const dialog = requestDialog({ title: 'Settings' });
+console.log('dialog id:', dialog.id);
+console.log('dialog context:', getContext(dialog.id));
+await dialog;
 ```
 
 - Or target a renderer per call:
 
 ```tsx
-const [requestDialog] = useHookDialog();
-await requestDialog({ title: 'Switch', instanceId: 'primary' });
+const [requestDialog, getContext] = useHookDialog();
+const dialog = requestDialog({ title: 'Switch', instanceId: 'primary' });
+console.log('dialog id:', dialog.id);
+console.log('dialog context:', getContext(dialog.id));
+await dialog;
 ```
 
 - Programmatic store access:
@@ -388,10 +409,10 @@ Main dialog container component.
 import { useHookDialog } from '@rokku-x/react-hook-dialog';
 
 function DeleteConfirm() {
-  const [requestDialog] = useHookDialog();
+  const [requestDialog, getContext] = useHookDialog();
 
   const handleDelete = async () => {
-    const result = await requestDialog({
+    const dialog = requestDialog({
       title: 'Delete Item?',
       content: 'This action cannot be undone.',
       actions: [[
@@ -400,6 +421,10 @@ function DeleteConfirm() {
       ]]
     });
 
+    console.log('Dialog id:', dialog.id);
+    console.log('Dialog context:', getContext(dialog.id));
+
+    const result = await dialog;
     if (result === true) {
       console.log('Item deleted!');
     }

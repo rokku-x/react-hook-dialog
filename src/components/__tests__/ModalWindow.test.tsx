@@ -174,6 +174,36 @@ describe('ModalWindow', () => {
         outside.remove()
     })
 
+    it('closes on Escape key from nested content and restores focus', () => {
+        const handleClose = vi.fn()
+        const outside = document.createElement('button')
+        outside.textContent = 'outside'
+        document.body.appendChild(outside)
+        outside.focus()
+
+        const { getByLabelText, getByPlaceholderText, unmount } = render(
+            <ModalWindow
+                modalWindowId="mk2"
+                handleAction={() => { }}
+                handleClose={handleClose}
+                config={{
+                    content: <input placeholder="nested-input" />,
+                    showCloseButton: true,
+                }}
+            />
+        )
+
+        const nestedInput = getByPlaceholderText('nested-input')
+        nestedInput.focus()
+        fireEvent.keyDown(nestedInput, { key: 'Escape' })
+
+        expect(handleClose).toHaveBeenCalledWith('mk2')
+
+        unmount()
+        expect(document.activeElement?.textContent).toBe('outside')
+        outside.remove()
+    })
+
     it('respects noActionReturn: calls onClick but does not call handleAction', () => {
         const handleAction = vi.fn()
         const actionOnClick = vi.fn()

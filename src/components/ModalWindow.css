@@ -49,4 +49,45 @@
     font-size: 14px;
     font-weight: 800;
     cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.hook-dialog-action-button:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.hook-dialog-action-primary {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+.hook-dialog-action-secondary {
+    background-color: #e5e7eb;
+    color: #111;
+}
+
+.hook-dialog-action-danger {
+    background-color: #dc2626;
+    color: #fff;
+}
+
+.hook-dialog-action-success {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.hook-dialog-action-warning {
+    background-color: #f59e0b;
+    color: #111;
+}
+
+.hook-dialog-action-info {
+    background-color: #0ea5e9;
+    color: #fff;
+}
+
+.hook-dialog-action-neutral {
+    background-color: #6b7280;
+    color: #fff;
 }
