@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.5
+
+### Patch Changes
+
+- 91ff0b7: feat: enhance useHookDialog to return dialog context and update ModalWindow styles
+
 ## 1.2.4
 
 ### Patch Changes
