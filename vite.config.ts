@@ -55,6 +55,26 @@ function injectCss() {
     };
 }
 
+function fixPureAnnotations() {
+    return {
+        name: 'fix-pure-annotations',
+        enforce: 'post' as const,
+        generateBundle(_options: any, bundle: any) {
+            for (const key of Object.keys(bundle)) {
+                const chunk = bundle[key];
+                if (chunk.type === 'chunk' && chunk.code) {
+                    // Fix misplaced @__PURE__ annotations that end up before `return`
+                    // instead of directly before the function call.
+                    chunk.code = chunk.code.replace(
+                        /\/\*\s*@__PURE__\s*\*\/\s*\n?\s*return\s+/g,
+                        'return /* @__PURE__ */ '
+                    );
+                }
+            }
+        }
+    };
+}
+
 export default defineConfig({
     resolve: {
         alias: {
@@ -71,7 +91,8 @@ export default defineConfig({
             exclude: ['src/main.tsx', 'src/**/*.test.*', 'src/**/*.spec.*', 'src/**/__tests__/**'],
             rollupTypes: false
         }),
-        injectCss()
+        injectCss(),
+        fixPureAnnotations()
     ],
     build: {
         // 1. Use Terser instead of Esbuild to better preserve directives
