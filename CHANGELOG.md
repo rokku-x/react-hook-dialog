@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.6
+
+### Patch Changes
+
+- 117940f: feat: add fixPureAnnotations plugin to correct misplaced @**PURE** annotations in generated bundles
+
 ## 1.2.5
 
 ### Patch Changes
