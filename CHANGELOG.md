@@ -1,5 +1,11 @@
 # @rokku-x/react-hook-dialog
 
+## 1.2.7
+
+### Patch Changes
+
+- 389a7c1: updated all packages
+
 ## 1.2.6
 
 ### Patch Changes
